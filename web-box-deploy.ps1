@@ -39,7 +39,7 @@ Function GetAllSiteNames() {
 
 Function GetSites() {
 	$installedVersions = GetAllSiteNames |
-		where { $_ -match "$version_regex$" } |
+		where { $_ -match "^$version_regex$" } |
 		foreach { [System.Version] $matches['version'] }
 		
 	return $installedVersions
@@ -69,7 +69,7 @@ Function GetPackages() {
 	$packages = @()
 	Get-ChildItem $path_releases | where { $_ -ne $null} | 
 		where { !$_.PSIsContainer } | 
-		where { $_ -match "$version_regex-archive.zip$" } |
+		where { $_ -match "^$version_regex-archive.zip$" } |
 		foreach {
 			$pack = New-Object Object
 			
