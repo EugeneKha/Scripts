@@ -47,7 +47,7 @@ Function GetSites() {
 
 Function StopAllSites() {
 	GetAllSiteNames |
-		foreach { &$appcmd stop site "$_" }
+		foreach { &$appcmd stop site "$_" | Out-Host }
 }
 
 Function StartLatestSite() {
@@ -56,13 +56,13 @@ Function StartLatestSite() {
 	$maxVersion = $installedVersions | Sort-Object | Select-Object -Last 1
 
 	if ($maxVersion -ne $null) {
-		&$appcmd start site "TP-$maxVersion"
+		&$appcmd start site "TP-$maxVersion" | Out-Host
 	}	
 }
 
 Function DeleteSite($version) {
-		&$appcmd delete site "TP-$version"
-		&$appcmd delete apppool "TP-$version"
+		&$appcmd delete site "TP-$version" | Out-Host
+		&$appcmd delete apppool "TP-$version" | Out-Host
 }
 
 Function GetPackages() {
@@ -112,9 +112,9 @@ Function CreateSite($version, $packagePath) {
 	$sitePath = "$packagePath\wwwroot"
 	$bindings = GetBindings $path_config
 	
-	&$appcmd add site /name:"$siteName" /bindings:"$bindings" /physicalPath:$sitePath
-	&$appcmd add apppool /name:"$siteName" /managedPipelineMode:Classic /processModel.identityType:NetworkService #/processModel.userName:OFFICE\khasenevich /processModel.password:xxx
-	&$appcmd set app "$siteName/" /applicationPool:"$siteName"
+	&$appcmd add site /name:"$siteName" /bindings:"$bindings" /physicalPath:$sitePath | Out-Host
+	&$appcmd add apppool /name:"$siteName" /managedPipelineMode:Classic /processModel.identityType:NetworkService | Out-Host #/processModel.userName:OFFICE\khasenevich /processModel.password:xxx
+	&$appcmd set app "$siteName/" /applicationPool:"$siteName" | Out-Host
 }
 
 #################################################################################################
