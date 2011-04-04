@@ -1,6 +1,6 @@
 param(
 	[string] $path_releases = "\\fs.tpondemand.net\Releases", 
-	[string] $path_config = "\\fs.tpondemand.com\Users",
+	[string] $path_config = "\\fs.tpondemand.net\Users",
 	[string] $path_wwwroot = "c:\Inetpub\wwwroot"
 )
 
@@ -120,8 +120,6 @@ Function CreateSite($version, $packagePath) {
 #################################################################################################
 #################### END OF FUNCTIONS ###########################################################
 #################################################################################################
-
-"Test Message"
 
 # Delete all Sites
 GetSites | where { $_ -ne $null } |
