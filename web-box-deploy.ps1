@@ -121,9 +121,6 @@ Function CreateSite($version, $packagePath) {
 #################### END OF FUNCTIONS ###########################################################
 #################################################################################################
 
-"Hello World"
-return
-
 # Delete all Sites
 GetSites | where { $_ -ne $null } |
 	foreach {
