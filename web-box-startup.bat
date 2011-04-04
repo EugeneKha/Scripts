@@ -1,3 +1,3 @@
 cd c:\Inetpub\Scripts
-git pull
+call git pull
 powershell -Command "& {start-transcript; .\web-box-deploy.ps1}"
