@@ -1,9 +1,12 @@
 param(
-	[string] $path_releases = "\\fs.tpondemand.net\Releases", 
+	[string] $path_releases = "\\fs.tpondemand.net\Releases",
+	#[string] $path_releases = "c:\Inetpub",
 	[string] $path_config = "\\fs.tpondemand.net\Users",
-	[string] $path_wwwroot = "c:\Inetpub\wwwroot"
-	[string] $type = "OnDemand"
+	[string] $path_wwwroot = "c:\Inetpub\wwwroot",
+	[string] $type = "Ondemand"
 )
+
+$isOnDemand = ($type -eq "Ondemand")
 
 [string] $version_regex = "TP-(?<version>(?<major>\d+)\.(?<minor>\d+)\.(?<build>\d+)\.(?<revision>\d+))"
 [string] $appcmd = "$env:windir/system32/inetsrv/appcmd.exe"
@@ -23,12 +26,17 @@ Function UpdateWebConfig($webConfigPath) {
 		where {$_ -notmatch 'HostingModule'} |
 		foreach	{
 			$_
-			if ($_ -imatch '<appSettings') {
+			if ($_ -imatch '<appSettings' -and $isOnDemand) {
 				"<add key=`"Hosting.Root`" value=`"$path_config`" />"
 			}
 
 			if ($_ -imatch '<httpModules') {
-				'<add name="HostingModule" type="Tp.Web.Extensions.Hosting.OnDemandModule, Tp.Web.Extensions" />'
+                if ($isOnDemand) {
+				    '<add name="HostingModule" type="Tp.Web.Extensions.Hosting.OnDemandModule, Tp.Web.Extensions" />'
+                }
+                else {
+				    '<add name="HostingModule" type="Tp.Web.Extensions.Hosting.OnSiteModule, Tp.Web.Extensions" />'
+                }
 			}
 		} |
 	set-content $webConfigPath
@@ -110,12 +118,16 @@ Function GetBindings($configPath) {
 
 Function CreateSite($version, $packagePath) {
 	$siteName = "TP-$version"
-	$sitePath = "$packagePath\wwwroot"
+	$physicalPath = "$packagePath\wwwroot"
 	$bindings = GetBindings $path_config
 	
-	&$appcmd add site /name:"$siteName" /bindings:"$bindings" /physicalPath:$sitePath | Out-Host
+	&$appcmd add site /name:"$siteName" /bindings:"$bindings" /physicalPath:$physicalPath | Out-Host
 	&$appcmd add apppool /name:"$siteName" /managedPipelineMode:Classic /processModel.identityType:NetworkService | Out-Host #/processModel.userName:OFFICE\khasenevich /processModel.password:xxx
 	&$appcmd set app "$siteName/" /applicationPool:"$siteName" | Out-Host
+    
+    if (!$isOnDemand) {
+        &$appcmd add app /site.name:"$siteName" /path:"/TargetProcess" /physicalPath:$physicalPath /applicationPool:"$siteName" | Out-Host
+    }
 }
 
 #################################################################################################
@@ -134,7 +146,7 @@ GetPackages |
 		if (!$_.IsExtracted()) {
 			$_.Extract()
 		}
-		$_.UpdateWebConfig()
+        $_.UpdateWebConfig()
 		CreateSite $_.version $_.Path
 	}
 
