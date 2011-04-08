@@ -1,6 +1,6 @@
 param(
-	#[string] $path_releases = "\\fs.tpondemand.net\Releases",
-	[string] $path_releases = "c:\Inetpub",
+	[string] $path_releases = "\\fs.tpondemand.net\Releases",
+	#[string] $path_releases = "c:\Inetpub",
 	[string] $path_config = "\\fs.tpondemand.net\Users",
 	[string] $path_wwwroot = "c:\Inetpub\wwwroot",
 	[string] $type = "Ondemand"
