@@ -1,6 +1,6 @@
 param(
-	[string] $path_releases = "\\fs.tpondemand.net\Releases",
-	#[string] $path_releases = "c:\Inetpub",
+	#[string] $path_releases = "\\fs.tpondemand.net\Releases",
+	[string] $path_releases = "c:\Inetpub",
 	[string] $path_config = "\\fs.tpondemand.net\Users",
 	[string] $path_wwwroot = "c:\Inetpub\wwwroot",
 	[string] $type = "Ondemand"
@@ -121,13 +121,17 @@ Function CreateSite($version, $packagePath) {
 	$physicalPath = "$packagePath\wwwroot"
 	$bindings = GetBindings $path_config
 	
-	&$appcmd add site /name:"$siteName" /bindings:"$bindings" /physicalPath:$physicalPath | Out-Host
 	&$appcmd add apppool /name:"$siteName" /managedPipelineMode:Classic /processModel.identityType:NetworkService | Out-Host #/processModel.userName:OFFICE\khasenevich /processModel.password:xxx
-	&$appcmd set app "$siteName/" /applicationPool:"$siteName" | Out-Host
     
-    if (!$isOnDemand) {
-        &$appcmd add app /site.name:"$siteName" /path:"/TargetProcess" /physicalPath:$physicalPath /applicationPool:"$siteName" | Out-Host
+    if ($isOnDemand) {
+		&$appcmd add site /name:"$siteName" /bindings:"$bindings" /physicalPath:$physicalPath | Out-Host
+		&$appcmd set app "$siteName/" /applicationPool:"$siteName" | Out-Host
     }
+	else {
+		&$appcmd add site /name:"$siteName" /bindings:"$bindings" /physicalPath:$path_wwwroot | Out-Host
+        &$appcmd add app /site.name:"$siteName" /path:"/TargetProcess" /physicalPath:$physicalPath  | Out-Host
+		&$appcmd set app "$siteName/Targetprocess" /applicationPool:"$siteName" | Out-Host
+	}
 }
 
 #################################################################################################
